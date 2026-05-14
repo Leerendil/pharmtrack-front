@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmTrack</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #222; }
+
+/* Header */
+.header { background: #15803d; color: #fff; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header a { color: #fff; text-decoration: none; }
+.logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.nav { display: flex; gap: 4px; }
+.nav a { padding: 8px 14px; border-radius: 8px; font-size: 14px; }
+.nav a:hover { background: rgba(255,255,255,0.15); }
+.nav a.active { background: rgba(255,255,255,0.25); }
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.btn-logout { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.btn-logout:hover { background: rgba(255,255,255,0.3); }
+.header .btn-login { background: #fff; color: #15803d; border: 2px solid #fff; padding: 6px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: none; }
+.header .btn-login:hover { background: #dcfce7; color: #166534; }
+
+/* Main */
+.main { max-width: 1100px; margin: 0 auto; padding: 20px; min-height: calc(100vh - 56px - 48px); }
+
+/* Cards */
+.card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 16px; }
+
+/* Forms */
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: #555; margin-bottom: 4px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #15803d; box-shadow: 0 0 0 3px rgba(21,128,61,0.15); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* Buttons */
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-primary { background: #15803d; color: #fff; }
+.btn-primary:hover { background: #166534; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-outline { background: #fff; border: 1px solid #d1d5db; color: #333; }
+.btn-outline:hover { background: #f9fafb; }
+.btn-success { background: #16a34a; color: #fff; }
+.btn-success:hover { background: #15803d; }
+.btn-warning { background: #f59e0b; color: #fff; }
+.btn-warning:hover { background: #d97706; }
+
+/* Grid */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 768px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+
+/* Medicine card */
+.med-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; cursor: pointer; transition: box-shadow 0.2s; }
+.med-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.med-card-img { height: 120px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.med-card-body { padding: 12px; }
+.med-card-body h3 { font-size: 14px; margin-bottom: 4px; }
+.med-card-body .dosage { font-size: 12px; color: #888; margin-bottom: 6px; }
+.med-card-body .price { font-weight: 700; color: #15803d; }
+.med-card-body .badge { font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+
+/* Auth forms */
+.auth-wrap { max-width: 380px; margin: 60px auto; }
+.auth-wrap h1 { font-size: 22px; text-align: center; margin-bottom: 4px; }
+.auth-wrap p { text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
+.auth-wrap .logo-icon { width: 48px; height: 48px; background: #15803d; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; color: #fff; }
+
+/* Alert */
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; }
+.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+.alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+.alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+
+/* Cart item */
+.cart-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 8px; }
+.cart-item-img { width: 48px; height: 48px; background: #f0fdf4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-info h4 { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cart-item-info span { font-size: 13px; color: #888; }
+.cart-item-qty { display: flex; align-items: center; gap: 6px; }
+.cart-item-qty button { width: 28px; height: 28px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.cart-item-qty span { min-width: 24px; text-align: center; font-weight: 500; }
+.cart-item-total { font-weight: 700; color: #15803d; min-width: 80px; text-align: right; }
+.cart-item-del { background: none; border: none; color: #aaa; cursor: pointer; font-size: 18px; padding: 4px; }
+.cart-item-del:hover { color: #dc2626; }
+
+/* Footer */
+.footer { background: #14532d; color: #bbf7d0; text-align: center; padding: 14px; font-size: 13px; }
+
+/* Pagination */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; }
+.pagination button { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; }
+.pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+.pagination span { font-size: 14px; color: #666; }
+
+/* Search bar */
+.search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.search-bar input { flex: 1; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; }
+.search-bar input:focus { outline: none; border-color: #15803d; }
+
+/* Filters */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filters input, .filters select { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; }
+
+/* Hero */
+.hero { background: linear-gradient(to right, #15803d, #22c55e); color: #fff; border-radius: 16px; padding: 32px; margin-bottom: 20px; }
+.hero h1 { font-size: 28px; margin-bottom: 4px; }
+.hero p { color: #dcfce7; margin-bottom: 16px; }
+
+/* Profile */
+.profile-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; }
+.profile-row .icon { color: #888; }
+
+/* Order status badges */
+.status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.status-CREATED { background: #dbeafe; color: #1d4ed8; }
+.status-PAID { background: #dcfce7; color: #15803d; }
+.status-TRANSIT { background: #fef3c7; color: #92400e; }
+.status-DELIVERED { background: #bbf7d0; color: #166534; }
+.status-CANCELLED { background: #fecaca; color: #dc2626; }
+.status-FAILED { background: #f3f4f6; color: #6b7280; }
+.status-PENDING { background: #dbeafe; color: #1d4ed8; }
+.status-CONFIRMED { background: #dcfce7; color: #15803d; }
+.status-SHIPPED { background: #fef3c7; color: #92400e; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 0; }
+.tab { padding: 10px 18px; cursor: pointer; font-size: 14px; font-weight: 500; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; border-radius: 8px 8px 0 0; }
+.tab:hover { color: #15803d; background: #f0fdf4; }
+.tab.active { color: #15803d; border-bottom-color: #15803d; background: #f0fdf4; }
+
+/* Admin/Manufacturer panels */
+.panel-section { display: none; }
+.panel-section.active { display: block; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th, .data-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+.data-table th { background: #f9fafb; font-weight: 600; color: #555; font-size: 13px; }
+.data-table tr:hover { background: #f9fafb; }
+
+/* Inline form */
+.inline-form { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.inline-form .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
+
+/* Debug panel */
+.debug-panel { background: #1e1e1e; color: #0f0; font-family: monospace; font-size: 12px; padding: 16px; border-radius: 8px; margin-top: 20px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a href="#" class="logo" onclick="navigate(isLoggedIn()?'catalog':'login')">💊 PharmTrack</a>
+  <div class="nav" id="nav"></div>
+  <div class="user-info" id="user-info"></div>
+</div>
+
+<!-- Main content -->
+<div class="main" id="app"></div>
+
+<!-- Footer -->
+<div class="footer">PharmTrack &copy; 2026 — Интернет-аптека</div>
+
+<script>
+// ======================== CONFIG ========================
+const API = 'http://localhost:8080/api/v1';
+
+// ======================== STATE ========================
+let state = {
+  token: localStorage.getItem('access_token') || null,
+  refreshToken: localStorage.getItem('refresh_token') || null,
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  page: 'catalog',
+  adminTab: 'applications',
+  manufacturerTab: 'create-medicine',
+  categories: [],
+  medicines: [],
+  totalElements: 0,
+  totalPages: 0,
+  currentPage: 0,
+  cart: [],
+  searchName: '',
+  filterCategory: '',
+  filterManufacturer: '',
+  filterCountry: '',
+  filterMinPrice: '',
+  filterMaxPrice: '',
+};
+
+// ======================== CONSTANTS ========================
+const COUNTRIES = [
+  'Russia', 'Belarus', 'USA', 'UK', 'Germany',
+  'France', 'India', 'China', 'Japan', 'Switzerland'
+];
+
+// ======================== API ========================
+async function api(method, path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+
+  const res = await fetch(API + path, opts);
+
+  if (res.status === 401) {
+    const hadToken = !!state.token;
+    console.error('401 on', method, path, '| Had token:', hadToken);
+    if (hadToken) {
+      try {
+        const payload = JSON.parse(atob(state.token.split('.')[1]));
+        console.error('Token aud:', payload.aud, '| azp:', payload.azp, '| exp:', new Date(payload.exp * 1000).toISOString());
+      } catch(e) {}
+    }
+    const err = new Error('Unauthorized');
+    err.status = 401;
+    throw err;
+  }
+
+  if (!res.ok) {
+    let msg = 'Ошибка ' + res.status;
+    try { const d = await res.json(); msg = d.message || msg; } catch(e) {}
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+
+  if (res.status === 204) return null;
+
+  // Try JSON first, fall back to plain text
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    return text; // plain text response (e.g. "Application approved successfully")
+  }
+}
+
+// ======================== AUTH ========================
+async function doLogin(username, password) {
+  const data = await api('POST', '/auth/login', { username, rawPassword: password });
+
+  state.token = data.access_token;
+  state.refreshToken = data.refresh_token || '';
+  localStorage.setItem('access_token', state.token);
+  localStorage.setItem('refresh_token', state.refreshToken);
+
+  // Build user from JWT
+  try {
+    const payload = JSON.parse(atob(state.token.split('.')[1]));
+    const roles = payload.resource_access?.['pharmtrack-backend-client']?.roles || [];
+    const role = roles.includes('ADMIN') ? 'ADMIN' :
+                 roles.includes('MANUFACTURER') ? 'MANUFACTURER' :
+                 roles.includes('MANAGER') ? 'MANAGER' : 'USER';
+    state.user = {
+      keycloakId: payload.sub || '',
+      username: payload.preferred_username || username,
+      email: payload.email || '',
+      firstName: payload.given_name || username,
+      lastName: payload.family_name || '',
+      role: role,
+    };
+
+    // Save JWT role — it's the source of truth (Keycloak manages roles)
+    const jwtRole = state.user.role;
+
+    // Try to get user from user-service
+    try {
+      const userRes = await api('GET', '/users/' + encodeURIComponent(state.user.email));
+      state.user = { ...userRes, role: jwtRole };
+    } catch(e) {
+      console.warn('Could not fetch user from user-service, trying to create...', e.message);
+      try {
+        const created = await api('POST', '/users', state.user);
+        state.user = { ...created, role: jwtRole };
+      } catch(e2) {
+        console.warn('Could not create user either, using JWT fallback', e2.message);
+      }
+    }
+  } catch(e) {
+    state.user = { keycloakId: '', username, email: '', firstName: username, lastName: '', role: 'USER' };
+  }
+
+  localStorage.setItem('user', JSON.stringify(state.user));
+  navigate('catalog');
+}
+
+async function doRegister(username, firstName, lastName, email, password) {
+  await api('POST', '/auth/register', { username, firstName, lastName, email, rawPassword: password });
+  await doLogin(username, password);
+}
+
+function doLogout() {
+  state.token = null;
+  state.refreshToken = null;
+  state.user = null;
+  state.cart = [];
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user');
+  navigate('login');
+}
+
+function isLoggedIn() {
+  if (!state.token || !state.user) return false;
+  try {
+    const payload = JSON.parse(atob(state.token.split('.')[1]));
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      doLogout();
+      return false;
+    }
+  } catch(e) {
+    doLogout();
+    return false;
+  }
+  return true;
+}
+function isAdmin() { return state.user?.role === 'ADMIN'; }
+function isManufacturer() { return state.user?.role === 'MANUFACTURER'; }
+function isManager() { return state.user?.role === 'MANAGER'; }
+
+function roleLabel(r) {
+  switch(r) {
+    case 'ADMIN': return 'Администратор';
+    case 'MANUFACTURER': return 'Производитель';
+    case 'MANAGER': return 'Менеджер';
+    default: return 'Пользователь';
+  }
+}
+
+// ======================== NAVIGATION ========================
+function navigate(page) {
+  state.page = page;
+  window.location.hash = page;
+  render();
+}
+
+window.addEventListener('hashchange', () => {
+  state.page = window.location.hash.slice(1) || 'catalog';
+  render();
+});
+
+// ======================== RENDER ========================
+function render() {
+  renderNav();
+  const app = document.getElementById('app');
+  switch(state.page) {
+    case 'login': app.innerHTML = renderLogin(); break;
+    case 'register': app.innerHTML = renderRegister(); break;
+    case 'catalog': loadCategories(); loadMedicines(); app.innerHTML = renderCatalog(); break;
+    case 'product': app.innerHTML = renderProduct(); break;
+    case 'cart': loadCart(); app.innerHTML = renderCart(); break;
+    case 'orders': app.innerHTML = renderOrders(); break;
+    case 'profile': app.innerHTML = renderProfile(); break;
+    case 'admin': app.innerHTML = renderAdmin(); break;
+    case 'manufacturer': app.innerHTML = renderManufacturer(); break;
+    case 'apply-manufacturer': app.innerHTML = renderApplyManufacturer(); break;
+    default: state.page = isLoggedIn() ? 'catalog' : 'login'; app.innerHTML = isLoggedIn() ? renderCatalog() : renderLogin(); break;
+  }
+}
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  const info = document.getElementById('user-info');
+
+  let navHtml = `<a href="#catalog" class="${state.page==='catalog'?'active':''}">Каталог</a>`;
+  if (isLoggedIn()) {
+    navHtml += `<a href="#cart" class="${state.page==='cart'?'active':''}">Корзина</a>`;
+    navHtml += `<a href="#orders" class="${state.page==='orders'?'active':''}">Заказы</a>`;
+    navHtml += `<a href="#profile" class="${state.page==='profile'?'active':''}">Профиль</a>`;
+    if (isAdmin()) navHtml += `<a href="#admin" class="${state.page==='admin'?'active':''}">Админ</a>`;
+    if (isManufacturer()) navHtml += `<a href="#manufacturer" class="${state.page==='manufacturer'?'active':''}">Производитель</a>`;
+  }
+  nav.innerHTML = navHtml;
+
+  if (isLoggedIn()) {
+    info.innerHTML = `<span>${state.user.firstName || state.user.username}</span><button class="btn-logout" onclick="doLogout()">Выйти</button>`;
+  } else {
+    info.innerHTML = `<a href="#login" class="btn-login">Войти</a>`;
+  }
+}
+
+// ======================== PAGES ========================
+
+function renderLogin() {
+  return `<div class="auth-wrap">
+    <div class="logo-icon">💊</div>
+    <h1>Вход в PharmTrack</h1>
+    <p>Введите логин и пароль</p>
+    <div class="card">
+      <div id="login-error"></div>
+      <div class="form-group"><label>Логин</label><input id="login-username" placeholder="username"></div>
+      <div class="form-group"><label>Пароль</label><input id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">Войти</button>
+    </div>
+    <p style="margin-top:12px">Нет аккаунта? <a href="#register" style="color:#15803d;font-weight:600">Зарегистрироваться</a></p>
+  </div>`;
+}
+
+async function handleLogin() {
+  const u = document.getElementById('login-username').value.trim();
+  const p = document.getElementById('login-password').value;
+  if (!u || !p) { document.getElementById('login-error').innerHTML = '<div class="alert alert-error">Введите логин и пароль</div>'; return; }
+  try {
+    await doLogin(u, p);
+  } catch(e) {
+    document.getElementById('login-error').innerHTML = '<div class="alert alert-error">' + e.message + '</div>';
+  }
+}
+
+function renderRegister() {
+  return `<div class="auth-wrap">
+    <div class="logo-icon">💊</div>
+    <h1>Регистрация</h1>
+    <p>Создайте аккаунт в PharmTrack</p>
+    <div class="card">
+      <div id="reg-error"></div>
+      <div class="form-group"><label>Логин (3-10 символов)</label><input id="reg-username" placeholder="username"></div>
+      <div style="display:flex;gap:8px">
+        <div class="form-group" style="flex:1"><label>Имя (2-10)</label><input id="reg-fname" placeholder="Иван"></div>
+        <div class="form-group" style="flex:1"><label>Фамилия (2-10)</label><input id="reg-lname" placeholder="Иванов"></div>
+      </div>
+      <div class="form-group"><label>Email</label><input id="reg-email" type="email" placeholder="user@example.com"></div>
+      <div class="form-group"><label>Пароль (5-15 символов)</label><input id="reg-pass" type="password" placeholder="••••••••"></div>
+      <div class="form-group"><label>Подтвердите пароль</label><input id="reg-pass2" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">Зарегистрироваться</button>
+    </div>
+    <p style="margin-top:12px">Уже есть аккаунт? <a href="#login" style="color:#15803d;font-weight:600">Войти</a></p>
+  </div>`;
+}
+
+async function handleRegister() {
+  const u = document.getElementById('reg-username').value.trim();
+  const f = document.getElementById('reg-fname').value.trim();
+  const l = document.getElementById('reg-lname').value.trim();
+  const e = document.getElementById('reg-email').value.trim();
+  const p = document.getElementById('reg-pass').value;
+  const p2 = document.getElementById('reg-pass2').value;
+  if (p !== p2) { document.getElementById('reg-error').innerHTML = '<div class="alert alert-error">Пароли не совпадают</div>'; return; }
+  try {
+    await doRegister(u, f, l, e, p);
+  } catch(err) {
+    document.getElementById('reg-error').innerHTML = '<div class="alert alert-error">' + err.message + '</div>';
+  }
+}
+
+function renderCatalog() {
+  const meds = state.medicines;
+  let html = `<div class="hero">
+    <h1>PharmTrack</h1>
+    <p>Ваша интернет-аптека — лекарства с доставкой</p>
+    <div class="search-bar" style="max-width:500px">
+      <input id="search-input" placeholder="Найти лекарство..." value="${esc(state.searchName)}" onkeydown="if(event.key==='Enter')searchMeds()">
+      <button class="btn btn-primary" onclick="searchMeds()">Найти</button>
+    </div>
+  </div>`;
+
+  // Filters
+  const catOptions = state.categories.map(c => `<option value="${esc(c.name)}" ${state.filterCategory===c.name?'selected':''}>${esc(c.name)}</option>`).join('');
+  const countryOptions = COUNTRIES.map(c => `<option value="${c}" ${state.filterCountry===c?'selected':''}>${c}</option>`).join('');
+
+  html += `<div class="card" style="margin-bottom:16px;padding:16px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:150px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:3px">Категория</label>
+        <select id="f-cat" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+          <option value="">Все категории</option>
+          ${catOptions}
+        </select>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:3px">Производитель</label>
+        <input id="f-mfr" placeholder="Название..." value="${esc(state.filterManufacturer)}" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:3px">Страна</label>
+        <select id="f-country" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+          <option value="">Все страны</option>
+          ${countryOptions}
+        </select>
+      </div>
+      <div style="min-width:90px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:3px">Цена от</label>
+        <input id="f-min" type="number" placeholder="0" value="${esc(state.filterMinPrice)}" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+      </div>
+      <div style="min-width:90px">
+        <label style="display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:3px">Цена до</label>
+        <input id="f-max" type="number" placeholder="99999" value="${esc(state.filterMaxPrice)}" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+      </div>
+      <div style="display:flex;gap:6px;padding-bottom:1px">
+        <button class="btn btn-sm btn-primary" onclick="applyFilters()">Применить</button>
+        <button class="btn btn-sm btn-outline" onclick="clearFilters()">Сброс</button>
+      </div>
+    </div>
+  </div>`;
+
+  if (!isLoggedIn()) {
+    html += '<div class="alert alert-info mb-4">Для доступа к каталогу необходимо <a href="#login" style="color:#1d4ed8;font-weight:600">войти</a></div>';
+  }
+
+  html += `<p style="font-size:13px;color:#888;margin-bottom:12px">Найдено: ${state.totalElements} товаров</p>`;
+
+  if (meds.length === 0) {
+    html += '<div class="card text-center" style="padding:40px"><p style="color:#aaa">Товары не найдены</p></div>';
+  } else {
+    html += '<div class="grid grid-4">';
+    for (const m of meds) {
+      html += `<div class="med-card" onclick="openProduct('${esc(m.name)}')">
+        <div class="med-card-img">💊</div>
+        <div class="med-card-body">
+          <h3>${esc(m.name)}</h3>
+          <div class="dosage">${esc(m.dosage)}</div>
+          <div><span class="price">${m.price} ₽</span>${m.prescriptionRequired ? '<span class="badge">Рецепт</span>' : ''}</div>
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // Pagination
+  if (state.totalPages > 1) {
+    html += `<div class="pagination">
+      <button onclick="goPage(${state.currentPage - 1})" ${state.currentPage===0?'disabled':''}>&larr;</button>
+      <span>${state.currentPage + 1} / ${state.totalPages}</span>
+      <button onclick="goPage(${state.currentPage + 1})" ${state.currentPage>=state.totalPages-1?'disabled':''}>&rarr;</button>
+    </div>`;
+  }
+
+  return html;
+}
+
+function renderProduct() {
+  const m = state._currentProduct;
+  if (!m) return '<div class="card"><p>Загрузка...</p></div>';
+
+  return `<div style="margin-bottom:12px"><a href="#catalog" style="color:#15803d;text-decoration:none">&larr; Назад к каталогу</a></div>
+  <div class="card" style="overflow:hidden">
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:0 0 200px;height:200px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:80px">💊</div>
+      <div style="flex:1;min-width:280px">
+        <h1 style="font-size:24px;margin-bottom:8px">${esc(m.name)}</h1>
+        <p style="color:#666;margin-bottom:16px">${esc(m.description)}</p>
+        <div style="margin-bottom:6px;font-size:14px"><strong>Дозировка:</strong> ${esc(m.dosage)} мг</div>
+        <div style="margin-bottom:6px;font-size:14px"><strong>Категория:</strong> ${esc(m.category?.name || '')}</div>
+        <div style="margin-bottom:6px;font-size:14px"><strong>Производитель:</strong> ${esc(m.manufacturer?.name || '')} (${esc(m.manufacturer?.country || '')})</div>
+        ${m.prescriptionRequired ? '<div class="alert alert-info" style="padding:8px 12px;display:inline-block;margin:8px 0">Требуется рецепт</div>' : ''}
+        <div style="margin-top:16px;display:flex;align-items:center;gap:16px">
+          <span style="font-size:28px;font-weight:700;color:#15803d">${m.price} ₽</span>
+          <button class="btn btn-primary" onclick="addToCart(${m.id},'${esc(m.name)}',${m.price})">В корзину</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCart() {
+  if (!isLoggedIn()) return '<div class="card text-center" style="padding:40px"><p>Войдите для просмотра корзины</p><a href="#login" class="btn btn-primary mt-4" style="display:inline-block;margin-top:12px">Войти</a></div>';
+
+  const items = state.cart;
+  if (items.length === 0) {
+    return '<div class="card text-center" style="padding:40px"><p style="color:#aaa;font-size:18px">Корзина пуста</p><a href="#catalog" class="btn btn-primary mt-4" style="display:inline-block;margin-top:12px">К каталогу</a></div>';
+  }
+
+  let total = 0;
+  let html = '<div class="flex-between mb-4"><h1 style="font-size:22px">Корзина</h1><button class="btn btn-sm btn-danger" onclick="clearCart()">Очистить</button></div>';
+
+  for (const item of items) {
+    const sum = item.price * item.quantity;
+    total += sum;
+    html += `<div class="cart-item">
+      <div class="cart-item-img">💊</div>
+      <div class="cart-item-info"><h4>${esc(item.name)}</h4><span>${item.price} ₽ / шт</span></div>
+      <div class="cart-item-qty">
+        <button onclick="changeQty(${item.medicineId},${item.quantity - 1})">-</button>
+        <span>${item.quantity}</span>
+        <button onclick="changeQty(${item.medicineId},${item.quantity + 1})">+</button>
+      </div>
+      <div class="cart-item-total">${sum.toFixed(2)} ₽</div>
+      <button class="cart-item-del" onclick="removeFromCart(${item.medicineId})">✕</button>
+    </div>`;
+  }
+
+  html += `<div class="card" style="margin-top:16px">
+    <div class="flex-between mb-4"><span style="font-size:18px;color:#666">Итого:</span><span style="font-size:24px;font-weight:700;color:#15803d">${total.toFixed(2)} ₽</span></div>
+    <button class="btn btn-primary" style="width:100%" onclick="createOrder()">Оформить заказ</button>
+  </div>`;
+
+  return html;
+}
+
+function renderOrders() {
+  if (!isLoggedIn()) return '<div class="card text-center" style="padding:40px"><p>Войдите для просмотра заказов</p></div>';
+
+  return `<h1 style="font-size:22px;margin-bottom:16px">Мои заказы</h1>
+  <div class="card">
+    <h3 style="margin-bottom:12px">Найти заказ по ID</h3>
+    <div class="search-bar">
+      <input id="order-id-input" placeholder="UUID заказа">
+      <button class="btn btn-primary" onclick="searchOrder()">Найти</button>
+    </div>
+    <div id="order-result"></div>
+  </div>`;
+}
+
+function renderProfile() {
+  if (!isLoggedIn()) return '<div class="card text-center" style="padding:40px"><p>Войдите для просмотра профиля</p></div>';
+  const u = state.user;
+
+  let html = `<h1 style="font-size:22px;margin-bottom:16px">Профиль</h1>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div style="width:56px;height:56px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#15803d">${(u.firstName||u.username).charAt(0).toUpperCase()}</div>
+      <div><h2 style="font-size:18px">${esc(u.firstName)} ${esc(u.lastName)}</h2><p style="color:#888;font-size:14px">@${esc(u.username)}</p></div>
+    </div>
+    <div class="profile-row"><span class="icon">📧</span><div><div style="font-size:12px;color:#888">Email</div><div style="font-size:14px;font-weight:500">${esc(u.email)}</div></div></div>
+    <div class="profile-row"><span class="icon">🛡️</span><div><div style="font-size:12px;color:#888">Роль</div><div style="font-size:14px;font-weight:500">${roleLabel(u.role)}</div></div></div>
+    ${u.keycloakId ? `<div class="profile-row"><span class="icon">🔑</span><div><div style="font-size:12px;color:#888">Keycloak ID</div><div style="font-size:13px;font-weight:500;font-family:monospace;word-break:break-all">${esc(u.keycloakId)}</div></div></div>` : ''}
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb">
+      <button class="btn btn-danger" onclick="doLogout()">Выйти из аккаунта</button>
+    </div>
+  </div>`;
+
+  // Apply as manufacturer button for regular users
+  if (u.role === 'USER') {
+    const hasApplied = localStorage.getItem('manufacturer_applied_' + u.keycloakId);
+    if (hasApplied) {
+      html += `<div class="card">
+        <h3 style="margin-bottom:8px">Заявка производителя</h3>
+        <div class="alert alert-info">Вы уже подали заявку на регистрацию производителя. Ожидайте решения администратора.</div>
+        <div style="margin-top:8px;font-size:13px;color:#888">Токен заявки: <span style="font-family:monospace;word-break:break-all">${esc(hasApplied)}</span></div>
+      </div>`;
+    } else {
+      html += `<div class="card">
+        <h3 style="margin-bottom:8px">Стать производителем</h3>
+        <p style="color:#888;font-size:14px;margin-bottom:16px">Подайте заявку на регистрацию вашей компании в каталоге производителей</p>
+        <button class="btn btn-primary" onclick="navigate('apply-manufacturer')">Подать заявку</button>
+      </div>`;
+    }
+  }
+
+  // Token debug
+  if (state.token) {
+    try {
+      const payload = JSON.parse(atob(state.token.split('.')[1]));
+      const exp = new Date(payload.exp * 1000);
+      const isExpired = exp < new Date();
+      html += `<details style="margin-top:16px"><summary style="cursor:pointer;color:#888;font-size:13px">Отладка токена</summary>
+      <div class="debug-panel">
+Token audience (aud): ${payload.aud}
+Token azp: ${payload.azp}
+Token exp: ${exp.toLocaleString('ru-RU')} ${isExpired ? 'ИСТЁК' : 'Действителен'}
+Token roles: ${JSON.stringify(payload.resource_access?.['pharmtrack-backend-client']?.roles || [])}
+Token iss: ${payload.iss}
+      </div></details>`;
+    } catch(e) {}
+  }
+
+  return html;
+}
+
+// ======================== ADMIN PANEL ========================
+function renderAdmin() {
+  if (!isAdmin()) return '<div class="alert alert-error">Доступ запрещён</div>';
+
+  const tabs = [
+    { id: 'applications', label: 'Заявки', icon: '📋' },
+    { id: 'roles', label: 'Роли', icon: '🛡️' },
+    { id: 'admin-orders', label: 'Заказы', icon: '📦' },
+    { id: 'categories', label: 'Категории', icon: '🏷️' },
+    { id: 'admin-medicines', label: 'Медикаменты', icon: '💊' },
+  ];
+
+  let html = `<h1 style="font-size:22px;margin-bottom:16px">Админ-панель</h1>
+  <div class="tabs">
+    ${tabs.map(t => `<div class="tab ${state.adminTab===t.id?'active':''}" onclick="switchAdminTab('${t.id}')">${t.icon} ${t.label}</div>`).join('')}
+  </div>`;
+
+  html += `<div id="admin-content">`;
+  switch(state.adminTab) {
+    case 'applications': html += renderAdminApplications(); break;
+    case 'roles': html += renderAdminRoles(); break;
+    case 'admin-orders': html += renderAdminOrders(); break;
+    case 'categories': html += renderAdminCategories(); break;
+    case 'admin-medicines': html += renderAdminMedicines(); break;
+  }
+  html += `</div>`;
+
+  return html;
+}
+
+function switchAdminTab(tab) {
+  state.adminTab = tab;
+  document.getElementById('admin-content').innerHTML = '';
+  render();
+}
+
+// --- Admin: Applications ---
+function renderAdminApplications() {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Рассмотрение заявки производителя</h3>
+    <p style="color:#888;font-size:14px;margin-bottom:16px">Введите токен заявки и примите решение (одобрить / отклонить)</p>
+    <div id="app-manage-msg"></div>
+    <div class="form-group">
+      <label>Токен заявки (UUID)</label>
+      <input id="app-token-input" placeholder="550e8400-e29b-41d4-a716-446655440000">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-success" onclick="manageApplication('APPROVED')">Одобрить</button>
+      <button class="btn btn-danger" onclick="manageApplication('REJECTED')">Отклонить</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:8px">Как работает процесс</h3>
+    <p style="color:#888;font-size:14px">1. Пользователь подаёт заявку через форму «Стать производителем»</p>
+    <p style="color:#888;font-size:14px">2. Система выдаёт ему уникальный токен заявки (UUID)</p>
+    <p style="color:#888;font-size:14px">3. Пользователь передаёт токен администратору</p>
+    <p style="color:#888;font-size:14px">4. Администратор вводит токен выше и принимает решение</p>
+    <p style="color:#888;font-size:14px">5. При одобрении производитель добавляется в каталог</p>
+  </div>`;
+}
+
+async function manageApplication(verdict) {
+  const token = document.getElementById('app-token-input')?.value.trim();
+  const msgEl = document.getElementById('app-manage-msg');
+  if (!token) { msgEl.innerHTML = '<div class="alert alert-error">Введите токен заявки</div>'; return; }
+  try {
+    const result = await api('POST', '/manufacturers/applications/manage', { applicationToken: token, verdict });
+    const serverMsg = typeof result === 'string' ? result : '';
+    msgEl.innerHTML = `<div class="alert alert-success">Заявка ${verdict === 'APPROVED' ? 'одобрена' : 'отклонена'}! ${serverMsg ? '<br><span style="font-size:13px;opacity:0.8">' + esc(serverMsg) + '</span>' : ''}</div>`;
+    document.getElementById('app-token-input').value = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+// --- Admin: Role Management ---
+function renderAdminRoles() {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Назначить роль пользователю</h3>
+    <p style="color:#888;font-size:14px;margin-bottom:16px">Найдите пользователя по email и назначьте ему роль</p>
+    <div id="role-msg"></div>
+    <div class="search-bar" style="margin-bottom:16px">
+      <input id="role-email-input" placeholder="Email пользователя">
+      <button class="btn btn-primary" onclick="searchUserForRole()">Найти</button>
+    </div>
+    <div id="role-user-info"></div>
+  </div>`;
+}
+
+async function searchUserForRole() {
+  const email = document.getElementById('role-email-input')?.value.trim();
+  const msgEl = document.getElementById('role-msg');
+  const infoEl = document.getElementById('role-user-info');
+  if (!email) { msgEl.innerHTML = '<div class="alert alert-error">Введите email</div>'; return; }
+  try {
+    const user = await api('GET', '/users/' + encodeURIComponent(email));
+    infoEl.innerHTML = `<div class="card" style="background:#f9fafb">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <div>
+          <p style="font-weight:600">${esc(user.firstName)} ${esc(user.lastName)} <span style="color:#888">@${esc(user.username)}</span></p>
+          <p style="font-size:13px;color:#888">Email: ${esc(user.email)}</p>
+          <p style="font-size:13px;color:#888">Keycloak ID: <span style="font-family:monospace;font-size:12px">${esc(user.keycloakId)}</span></p>
+          <p style="font-size:13px;color:#888">Текущая роль: <strong>${roleLabel(user.role)}</strong></p>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${['ADMIN','MANUFACTURER','MANAGER','USER'].map(r =>
+            `<button class="btn btn-sm ${r==='USER'?'btn-outline':r==='ADMIN'?'btn-danger':'btn-primary'}" onclick="assignRole('${user.keycloakId}','${r}')">${r}</button>`
+          ).join('')}
+        </div>
+      </div>
+    </div>`;
+    msgEl.innerHTML = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    infoEl.innerHTML = '';
+  }
+}
+
+async function assignRole(keycloakId, roleName) {
+  const msgEl = document.getElementById('role-msg');
+  if (!confirm(`Назначить роль ${roleName}?`)) return;
+  try {
+    await api('POST', '/auth/roles/assign', { keycloakId, roleName });
+    msgEl.innerHTML = `<div class="alert alert-success">Роль ${roleName} успешно назначена!</div>`;
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+// --- Admin: Order Management ---
+function renderAdminOrders() {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Управление заказами</h3>
+    <p style="color:#888;font-size:14px;margin-bottom:16px">Поиск заказа по ID и изменение его статуса</p>
+    <div id="admin-order-msg"></div>
+    <div class="search-bar" style="margin-bottom:16px">
+      <input id="admin-order-id" placeholder="UUID заказа">
+      <button class="btn btn-primary" onclick="adminSearchOrder()">Найти</button>
+    </div>
+    <div id="admin-order-result"></div>
+  </div>`;
+}
+
+async function adminSearchOrder() {
+  const id = document.getElementById('admin-order-id')?.value.trim();
+  const msgEl = document.getElementById('admin-order-msg');
+  const resEl = document.getElementById('admin-order-result');
+  if (!id) { msgEl.innerHTML = '<div class="alert alert-error">Введите ID заказа</div>'; return; }
+  try {
+    const order = await api('GET', '/orders/' + id);
+    const statuses = ['CREATED','PAID','TRANSIT','DELIVERED','CANCELLED','FAILED'];
+    resEl.innerHTML = `<div class="card" style="background:#f9fafb">
+      <div class="flex-between mb-4">
+        <div>
+          <p style="font-size:12px;color:#888">Заказ</p>
+          <p style="font-family:monospace;font-size:13px">${esc(order.id)}</p>
+        </div>
+        <span class="status status-${order.status}">${order.status}</span>
+      </div>
+      <div style="font-size:14px;color:#666;margin-bottom:12px">
+        <p>Покупатель: ${esc(order.buyerEmail)}</p>
+        <p>Дата: ${new Date(order.createdAt).toLocaleString('ru-RU')}</p>
+      </div>
+      <div style="padding-top:12px;border-top:1px solid #e5e7eb">
+        <p style="font-size:12px;color:#aaa;margin-bottom:8px">Изменить статус (админ):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${statuses.map(s => `<button class="btn btn-sm ${s===order.status?'btn-primary':'btn-outline'}" onclick="adminChangeOrderStatus('${order.id}','${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    msgEl.innerHTML = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    resEl.innerHTML = '';
+  }
+}
+
+async function adminChangeOrderStatus(orderId, status) {
+  const msgEl = document.getElementById('admin-order-msg');
+  try {
+    await api('PATCH', '/orders/admin', { orderId, status });
+    msgEl.innerHTML = `<div class="alert alert-success">Статус изменён на ${status}</div>`;
+    adminSearchOrder(); // refresh
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+// --- Admin: Categories ---
+function renderAdminCategories() {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Создать категорию</h3>
+    <div id="cat-msg"></div>
+    <div class="form-group">
+      <label>Название</label>
+      <input id="cat-name" placeholder="Обезболивающие">
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <textarea id="cat-desc" placeholder="Препараты для снятия боли различного происхождения"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="createCategory()">Создать</button>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:12px">Найти категорию</h3>
+    <div id="cat-search-msg"></div>
+    <div class="search-bar">
+      <input id="cat-search-name" placeholder="Название категории">
+      <button class="btn btn-outline" onclick="searchCategory()">Найти</button>
+    </div>
+    <div id="cat-search-result"></div>
+  </div>`;
+}
+
+async function createCategory() {
+  const name = document.getElementById('cat-name')?.value.trim();
+  const desc = document.getElementById('cat-desc')?.value.trim();
+  const msgEl = document.getElementById('cat-msg');
+  if (!name || !desc) { msgEl.innerHTML = '<div class="alert alert-error">Заполните все поля</div>'; return; }
+  try {
+    await api('POST', '/categories', { name, description: desc });
+    msgEl.innerHTML = `<div class="alert alert-success">Категория «${esc(name)}» создана!</div>`;
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-desc').value = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+async function searchCategory() {
+  const name = document.getElementById('cat-search-name')?.value.trim();
+  const msgEl = document.getElementById('cat-search-msg');
+  const resEl = document.getElementById('cat-search-result');
+  if (!name) { msgEl.innerHTML = '<div class="alert alert-error">Введите название</div>'; return; }
+  try {
+    const cat = await api('GET', '/categories/' + encodeURIComponent(name));
+    resEl.innerHTML = `<div class="card" style="background:#f9fafb"><p style="font-weight:600">${esc(cat.name)}</p><p style="color:#888;font-size:14px">${esc(cat.description)}</p></div>`;
+    msgEl.innerHTML = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    resEl.innerHTML = '';
+  }
+}
+
+// --- Admin: Medicines ---
+function renderAdminMedicines() {
+  return renderMedicineForm('admin');
+}
+
+// ======================== MANUFACTURER PANEL ========================
+function renderManufacturer() {
+  if (!isManufacturer()) return '<div class="alert alert-error">Доступ запрещён. Требуется роль MANUFACTURER.</div>';
+
+  const tabs = [
+    { id: 'create-medicine', label: 'Создать медикамент', icon: '💊' },
+    { id: 'my-medicines', label: 'Мои медикаменты', icon: '📋' },
+  ];
+
+  let html = `<h1 style="font-size:22px;margin-bottom:16px">Панель производителя</h1>
+  <div class="tabs">
+    ${tabs.map(t => `<div class="tab ${state.manufacturerTab===t.id?'active':''}" onclick="switchManufacturerTab('${t.id}')">${t.icon} ${t.label}</div>`).join('')}
+  </div>`;
+
+  html += `<div id="manufacturer-content">`;
+  switch(state.manufacturerTab) {
+    case 'create-medicine': html += renderMedicineForm('manufacturer'); break;
+    case 'my-medicines': html += renderMyMedicines(); break;
+  }
+  html += `</div>`;
+
+  return html;
+}
+
+function switchManufacturerTab(tab) {
+  state.manufacturerTab = tab;
+  render();
+}
+
+function renderMedicineForm(context) {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Создать медикамент</h3>
+    <div id="${context}-med-msg"></div>
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label>Название</label>
+        <input id="${context}-med-name" placeholder="Аспирин">
+      </div>
+      <div class="form-group">
+        <label>Дозировка (мг)</label>
+        <input id="${context}-med-dosage" type="number" placeholder="500">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <textarea id="${context}-med-desc" placeholder="Описание и показания препарата"></textarea>
+    </div>
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label>Цена (₽)</label>
+        <input id="${context}-med-price" type="number" step="0.01" placeholder="150.50">
+      </div>
+      <div class="form-group">
+        <label>Требуется рецепт</label>
+        <select id="${context}-med-rx">
+          <option value="false">Нет</option>
+          <option value="true">Да</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label>Категория (название)</label>
+        <input id="${context}-med-cat" placeholder="Обезболивающие">
+      </div>
+      <div class="form-group">
+        <label>Производитель (название)</label>
+        <input id="${context}-med-mfr" placeholder="Байер">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="createMedicine('${context}')">Создать медикамент</button>
+  </div>`;
+}
+
+async function createMedicine(context) {
+  const name = document.getElementById(`${context}-med-name`)?.value.trim();
+  const desc = document.getElementById(`${context}-med-desc`)?.value.trim();
+  const price = parseFloat(document.getElementById(`${context}-med-price`)?.value);
+  const dosage = parseInt(document.getElementById(`${context}-med-dosage`)?.value);
+  const rx = document.getElementById(`${context}-med-rx`)?.value === 'true';
+  const cat = document.getElementById(`${context}-med-cat`)?.value.trim();
+  const mfr = document.getElementById(`${context}-med-mfr`)?.value.trim();
+  const msgEl = document.getElementById(`${context}-med-msg`);
+
+  if (!name || !desc || !price || !dosage || !cat || !mfr) {
+    msgEl.innerHTML = '<div class="alert alert-error">Заполните все поля</div>';
+    return;
+  }
+
+  try {
+    await api('POST', '/medicines', {
+      name, description: desc, price, dosage,
+      prescriptionRequired: rx,
+      categoryName: cat, manufacturerName: mfr
+    });
+    msgEl.innerHTML = `<div class="alert alert-success">Медикамент «${esc(name)}» создан!</div>`;
+    // Clear form
+    ['name','desc','price','dosage','cat','mfr'].forEach(f => {
+      const el = document.getElementById(`${context}-med-${f}`);
+      if (el) el.value = '';
+    });
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+function renderMyMedicines() {
+  return `<div class="card">
+    <h3 style="margin-bottom:12px">Мои медикаменты</h3>
+    <p style="color:#888;font-size:14px;margin-bottom:16px">Найдите медикамент по названию для просмотра информации</p>
+    <div id="my-med-msg"></div>
+    <div class="search-bar">
+      <input id="my-med-search" placeholder="Название медикамента">
+      <button class="btn btn-primary" onclick="searchMyMedicine()">Найти</button>
+    </div>
+    <div id="my-med-result"></div>
+  </div>`;
+}
+
+async function searchMyMedicine() {
+  const name = document.getElementById('my-med-search')?.value.trim();
+  const msgEl = document.getElementById('my-med-msg');
+  const resEl = document.getElementById('my-med-result');
+  if (!name) { msgEl.innerHTML = '<div class="alert alert-error">Введите название</div>'; return; }
+  try {
+    const med = await api('GET', '/medicines/' + encodeURIComponent(name));
+    resEl.innerHTML = `<div class="card" style="background:#f9fafb">
+      <div class="flex-between mb-2">
+        <h3>${esc(med.name)}</h3>
+        <span class="price" style="font-size:18px">${med.price} ₽</span>
+      </div>
+      <p style="color:#666;font-size:14px;margin-bottom:8px">${esc(med.description)}</p>
+      <p style="font-size:13px;color:#888">Дозировка: ${med.dosage} мг | Категория: ${esc(med.category?.name||'')} | Производитель: ${esc(med.manufacturer?.name||'')}</p>
+      ${med.prescriptionRequired ? '<p style="font-size:13px;color:#92400e;margin-top:4px">Требуется рецепт</p>' : ''}
+    </div>`;
+    msgEl.innerHTML = '';
+  } catch(e) {
+    msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    resEl.innerHTML = '';
+  }
+}
+
+// ======================== APPLY MANUFACTURER PAGE ========================
+function renderApplyManufacturer() {
+  if (!isLoggedIn()) return '<div class="card text-center" style="padding:40px"><p>Войдите для подачи заявки</p></div>';
+
+  return `<div style="margin-bottom:12px"><a href="#profile" style="color:#15803d;text-decoration:none">&larr; Назад к профилю</a></div>
+  <h1 style="font-size:22px;margin-bottom:16px">Заявка на регистрацию производителя</h1>
+  <div class="card">
+    <div id="apply-msg"></div>
+    <div class="form-group">
+      <label>Название компании</label>
+      <input id="apply-name" placeholder="ООО ФармаПлюс">
+    </div>
+    <div class="form-group">
+      <label>Страна</label>
+      <input id="apply-country" placeholder="Россия">
+    </div>
+    <div class="form-group">
+      <label>Контактный email</label>
+      <input id="apply-email" type="email" placeholder="info@pharmaplus.ru">
+    </div>
+    <button class="btn btn-primary" onclick="submitManufacturerApplication()">Подать заявку</button>
+  </div>`;
+}
+
+async function submitManufacturerApplication() {
+  const name = document.getElementById('apply-name')?.value.trim();
+  const country = document.getElementById('apply-country')?.value.trim();
+  const email = document.getElementById('apply-email')?.value.trim();
+  const msgEl = document.getElementById('apply-msg');
+
+  if (!name || !country || !email) {
+    msgEl.innerHTML = '<div class="alert alert-error">Заполните все поля</div>';
+    return;
+  }
+
+  try {
+    const token = await api('POST', '/manufacturers', {
+      name, country, companyMail: email,
+      applicantId: state.user.keycloakId
+    });
+    // Save that user has applied
+    const tokenStr = typeof token === 'string' ? token : JSON.stringify(token);
+    localStorage.setItem('manufacturer_applied_' + state.user.keycloakId, tokenStr);
+    msgEl.innerHTML = `<div class="alert alert-success">
+      Заявка успешно подана!<br><br>
+      <strong>Токен заявки:</strong><br>
+      <span style="font-family:monospace;word-break:break-all">${esc(tokenStr)}</span><br><br>
+      Сохраните этот токен и передайте его администратору для рассмотрения заявки.
+    </div>`;
+    document.getElementById('apply-name').value = '';
+    document.getElementById('apply-country').value = '';
+    document.getElementById('apply-email').value = '';
+  } catch(e) {
+    // Handle duplicate application (backend returns 500 with duplicate key error)
+    const msg = e.message || '';
+    if (msg.includes('duplicate') || msg.includes('already exists') || msg.includes('500') || msg.includes('unique')) {
+      msgEl.innerHTML = `<div class="alert alert-error">Вы уже подавали заявку на регистрацию производителя. Ожидайте решения администратора.</div>`;
+      localStorage.setItem('manufacturer_applied_' + state.user.keycloakId, 'pending');
+    } else {
+      msgEl.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+}
+
+// ======================== DATA LOADERS ========================
+
+async function loadCategories() {
+  try {
+    const cats = await api('GET', '/categories');
+    state.categories = Array.isArray(cats) ? cats : [];
+  } catch(e) {
+    console.error('loadCategories error:', e.message);
+    state.categories = [];
+  }
+}
+
+async function loadMedicines() {
+  try {
+    const params = new URLSearchParams();
+    params.set('page', state.currentPage);
+    params.set('size', '12');
+    params.set('sort', 'name,asc');
+    if (state.searchName) params.set('name', state.searchName);
+    if (state.filterCategory) params.set('categoryName', state.filterCategory);
+    if (state.filterManufacturer) params.set('manufacturerName', state.filterManufacturer);
+    if (state.filterCountry) params.set('manufacturerCountry', state.filterCountry);
+    if (state.filterMinPrice) params.set('minPrice', state.filterMinPrice);
+    if (state.filterMaxPrice) params.set('maxPrice', state.filterMaxPrice);
+
+    const data = await api('GET', '/medicines/search?' + params.toString());
+    state.medicines = data.content || [];
+    state.totalElements = data.totalElements || 0;
+    state.totalPages = data.totalPages || 0;
+  } catch(e) {
+    console.error('loadMedicines error:', e.message);
+    state.medicines = [];
+    state.totalElements = 0;
+    state.totalPages = 0;
+  }
+  if (state.page === 'catalog') {
+    document.getElementById('app').innerHTML = renderCatalog();
+  }
+}
+
+async function loadCart() {
+  if (!isLoggedIn()) return;
+  try {
+    state.cart = await api('GET', '/carts') || [];
+  } catch(e) {
+    console.error('loadCart error:', e.message);
+    state.cart = [];
+  }
+  if (state.page === 'cart') {
+    document.getElementById('app').innerHTML = renderCart();
+  }
+}
+
+async function openProduct(name) {
+  try {
+    state._currentProduct = await api('GET', '/medicines/' + encodeURIComponent(name));
+  } catch(e) {
+    state._currentProduct = { name: name, description: 'Ошибка загрузки', price: 0, dosage: '', prescriptionRequired: false, category: {name:''}, manufacturer: {name:'',country:''} };
+  }
+  navigate('product');
+}
+
+// ======================== ACTIONS ========================
+
+function searchMeds() {
+  state.searchName = document.getElementById('search-input')?.value || '';
+  state.currentPage = 0;
+  loadMedicines();
+}
+
+function applyFilters() {
+  state.filterCategory = document.getElementById('f-cat')?.value || '';
+  state.filterManufacturer = document.getElementById('f-mfr')?.value.trim() || '';
+  state.filterCountry = document.getElementById('f-country')?.value || '';
+  state.filterMinPrice = document.getElementById('f-min')?.value || '';
+  state.filterMaxPrice = document.getElementById('f-max')?.value || '';
+  state.currentPage = 0;
+  loadMedicines();
+}
+
+function clearFilters() {
+  state.searchName = '';
+  state.filterCategory = '';
+  state.filterManufacturer = '';
+  state.filterCountry = '';
+  state.filterMinPrice = '';
+  state.filterMaxPrice = '';
+  state.currentPage = 0;
+  loadMedicines();
+}
+
+function goPage(p) {
+  if (p < 0 || p >= state.totalPages) return;
+  state.currentPage = p;
+  loadMedicines();
+}
+
+async function addToCart(medId, medName, medPrice) {
+  if (!isLoggedIn()) { navigate('login'); return; }
+  try {
+    await api('POST', '/carts', { medicineId: Number(medId), name: medName, quantity: 1, price: medPrice });
+    alert('Добавлено в корзину!');
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+async function removeFromCart(medId) {
+  try {
+    await api('DELETE', '/carts/' + medId);
+    loadCart();
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+async function changeQty(medId, newQty) {
+  if (newQty < 1) return;
+  const item = state.cart.find(i => i.medicineId === medId);
+  if (!item) return;
+  try {
+    await api('POST', '/carts', { ...item, quantity: newQty });
+    loadCart();
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+async function clearCart() {
+  if (!confirm('Очистить корзину?')) return;
+  try {
+    await api('DELETE', '/carts');
+    state.cart = [];
+    document.getElementById('app').innerHTML = renderCart();
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+async function createOrder() {
+  if (!confirm('Оформить заказ?')) return;
+  try {
+    const order = await api('POST', '/orders');
+    state.cart = [];
+    const orderId = order?.id || '';
+    if (orderId) {
+      alert('Заказ оформлен!\n\nID заказа: ' + orderId + '\n\nСохраните этот ID для отслеживания.');
+    } else {
+      alert('Заказ оформлен!');
+    }
+    navigate('orders');
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+async function searchOrder() {
+  const id = document.getElementById('order-id-input')?.value.trim();
+  if (!id) return;
+  const el = document.getElementById('order-result');
+  try {
+    const order = await api('GET', '/orders/' + id);
+    const userStatuses = ['PAID', 'CANCELLED'];
+    el.innerHTML = `<div class="card mt-4">
+      <div class="flex-between"><div><p style="font-size:12px;color:#888">Заказ</p><p style="font-family:monospace;font-size:13px">${esc(order.id)}</p></div><span class="status status-${order.status}">${order.status}</span></div>
+      <div style="margin-top:12px;font-size:14px;color:#666"><p>Покупатель: ${esc(order.buyerEmail)}</p><p>Дата: ${new Date(order.createdAt).toLocaleString('ru-RU')}</p></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">
+        <p style="font-size:12px;color:#aaa;margin-bottom:6px">Изменить статус:</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${userStatuses.map(s => `<button class="btn btn-sm btn-outline" onclick="changeOrderStatus('${order.id}','${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="alert alert-error mt-4">${e.message}</div>`;
+  }
+}
+
+async function changeOrderStatus(orderId, status) {
+  try {
+    await api('PATCH', '/orders', { orderId, status });
+    searchOrder();
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+// ======================== UTILS ========================
+function esc(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = String(s);
+  return div.innerHTML;
+}
+
+// ======================== INIT ========================
+// Clear stale tokens on load
+if (state.token) {
+  try {
+    const payload = JSON.parse(atob(state.token.split('.')[1]));
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      state.token = null;
+      state.refreshToken = null;
+      state.user = null;
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+    }
+  } catch(e) {
+    state.token = null;
+    state.refreshToken = null;
+    state.user = null;
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+  }
+}
+state.page = window.location.hash.slice(1) || (isLoggedIn() ? 'catalog' : 'login');
+render();
+</script>
+</body>
+</html>
